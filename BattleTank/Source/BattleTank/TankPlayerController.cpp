@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "TankPlayerController.h"
+#include "Engine/World.h"
 
 
 //Tick
@@ -37,6 +38,7 @@ void ATankPlayerController::AimTowardsCrosshair()
 	FVector hitLocation; //out param
 	if (GetSightRayHitLocation(hitLocation))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("HitLocation %s"), *(hitLocation.ToString()));
 		//if it hits the landscape
 			//tell controlled tank to aim at this point
 	}
@@ -50,22 +52,47 @@ bool ATankPlayerController::GetSightRayHitLocation(FVector& hitLocation) const
 	GetViewportSize(viewPortSizeX, viewPortSizeY);
 	auto screenLocation = FVector2D(CrossHairXLocation * viewPortSizeX, CrossHairYLocation * viewPortSizeY);
 
-	//deproject to get world
+	//"De-project" screen pos to a world direction
 	FVector lookDirection;
-	if( GetLookDirection(screenLocation, lookDirection) )
+	if (GetLookDirection(screenLocation, lookDirection))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ScreenLocation %s  WorldLocation %s"), *(screenLocation.ToString()), *(lookDirection.ToString()));
+		//Line trace along that direction and see what we hit
+		if (GetLookVectorHitLocation(lookDirection, hitLocation))
+		{
+			return true;
+		}
 	}
 
-	//"De-project" screen pos to a world direction
-	//Line trace along that direction and see what we hit
 	return false;
 }
 
 bool ATankPlayerController::GetLookDirection(const FVector2D& screenLocation, FVector& lookDirection) const
 {
 	FVector cameraWorldLocation;
-	return DeprojectScreenPositionToWorld(screenLocation.X, screenLocation.Y, cameraWorldLocation, lookDirection);
+	bool result =  DeprojectScreenPositionToWorld(screenLocation.X, screenLocation.Y, cameraWorldLocation, lookDirection);
+	//UE_LOG(LogTemp, Warning, TEXT("DeprojectScreenPositionToWorld Camera %s  "), *(cameraWorldLocation.ToString()));
+	return result;
 
+}
 
+bool ATankPlayerController::GetLookVectorHitLocation(const FVector& lookDirection, FVector& hitLocation) const
+{
+	FHitResult hitResult;
+	auto startLocation = PlayerCameraManager->GetCameraLocation();
+	//UE_LOG(LogTemp, Warning, TEXT("GetLookVectorHitLocation Camera %s  "), *(startLocation.ToString()));
+
+	auto endLocation = startLocation + lookDirection * LineTraceRange;
+	if( GetWorld()->LineTraceSingleByChannel(
+			hitResult,
+			startLocation,
+			endLocation,
+			ECollisionChannel::ECC_Visibility)
+	)
+	{
+		hitLocation = hitResult.Location;
+		return true;
+	}
+	hitLocation = FVector(0);
+	return false;
+	
 }
