@@ -26,3 +26,16 @@ void ATankAIController::BeginPlay()
 
 	UE_LOG(LogTemp, Warning, TEXT("ATankAIController::BeginPlay Player Tank %s"), *(GetPlayerTank()->GetName()));
 }
+
+void ATankAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	auto playerTank = GetPlayerTank();
+	auto ourTank = GetControlledTank();
+	if (playerTank && ourTank)
+	{
+		//TODO Movetowards the player
+
+		ourTank->AimAt(playerTank->GetActorLocation());
+	}
+}
