@@ -13,6 +13,11 @@ ATank::ATank()
 
 }
 
+void ATank::SetBarrelReference(UStaticMeshComponent* barrelToSet)
+{
+	TankAimingComponent->SetBarrelReference( barrelToSet );
+}
+
 // Called when the game starts or when spawned
 void ATank::BeginPlay()
 {
