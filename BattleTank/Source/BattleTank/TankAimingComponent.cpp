@@ -43,8 +43,6 @@ void UTankAimingComponent::AimAt(FVector hitLocation, float launchSpeed)
 {
 	if (!Barrel) { return; }
 
-	
-	
 
 	FVector outLaunchVelocity;
 	FVector startLocation = Barrel->GetSocketLocation(FName("Projectile"));
@@ -62,11 +60,28 @@ void UTankAimingComponent::AimAt(FVector hitLocation, float launchSpeed)
 		FCollisionResponseParams::DefaultResponseParam,
 		TArray < AActor * >(),
 		true //bool bDrawDebug
-	)
 		)
+	)
 	{
 		auto aimDirection = outLaunchVelocity.GetSafeNormal();
-		auto tankName = GetOwner()->GetName();
-		UE_LOG(LogTemp, Warning, TEXT("%s Aiming at %s "), *tankName, *(aimDirection.ToString()));
+		MoveBarrel(aimDirection);
+				
 	}
+}
+
+void UTankAimingComponent::MoveBarrel(FVector aimDirection)
+{
+	//work-out difference between barrel and aim direction
+	auto barrelRotator = Barrel->GetForwardVector().Rotation();
+	auto aimAsRotator = aimDirection.Rotation();
+	auto deltaRotator = aimAsRotator - barrelRotator;
+	UE_LOG(LogTemp, Warning, TEXT("Aiming rotator %s "), *(aimAsRotator.ToString()));
+
+	//move barrel this frame using a max barrel velocity
+
+	//get aimDirection in Tank CS
+	//extract Yaw and el
+	//set those as new targets for turret and barrel
+	//rotate barrel in tick 
+
 }
