@@ -1,8 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+#include "TankAimingComponent.h"
+
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "TankAimingComponent.h"
+#include "TankBarrel.h"
+#include "Engine/World.h"
+
 
 
 // Sets default values for this component's properties
@@ -15,7 +19,7 @@ UTankAimingComponent::UTankAimingComponent()
 	// ...
 }
 
-void UTankAimingComponent::SetBarrelReference(UStaticMeshComponent* barrelToSet)
+void UTankAimingComponent::SetBarrelReference(UTankBarrel* barrelToSet)
 {
 	Barrel = barrelToSet;
 }
@@ -64,12 +68,19 @@ void UTankAimingComponent::AimAt(FVector hitLocation, float launchSpeed)
 	)
 	{
 		auto aimDirection = outLaunchVelocity.GetSafeNormal();
-		MoveBarrel(aimDirection);
-				
+		MoveBarrelToward(aimDirection);
+
+		auto time = GetWorld()->GetTimeSeconds();
+		UE_LOG(LogTemp, Warning, TEXT("%f: Aiming solution found "), time);		
+	}
+	else
+	{
+		auto time = GetWorld()->GetTimeSeconds();
+		UE_LOG(LogTemp, Warning, TEXT("%f: No aiming solution "), time);
 	}
 }
 
-void UTankAimingComponent::MoveBarrel(FVector aimDirection)
+void UTankAimingComponent::MoveBarrelToward(FVector aimDirection)
 {
 	//work-out difference between barrel and aim direction
 	auto barrelRotator = Barrel->GetForwardVector().Rotation();
@@ -77,7 +88,9 @@ void UTankAimingComponent::MoveBarrel(FVector aimDirection)
 	auto deltaRotator = aimAsRotator - barrelRotator;
 	UE_LOG(LogTemp, Warning, TEXT("Aiming rotator %s "), *(aimAsRotator.ToString()));
 
-	//move barrel this frame using a max barrel velocity
+	Barrel->Elevate(5);
+
+	
 
 	//get aimDirection in Tank CS
 	//extract Yaw and el
