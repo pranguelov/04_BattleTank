@@ -58,7 +58,7 @@ void UTankAimingComponent::AimAt(FVector hitLocation, float launchSpeed)
 		hitLocation,
 		launchSpeed,
 		false,
-		5.f,//float CollisionRadius,
+		0.f,//float CollisionRadius,
 		0.f, //float OverrideGravityZ,
 		ESuggestProjVelocityTraceOption::DoNotTrace,
 		FCollisionResponseParams::DefaultResponseParam,
@@ -88,7 +88,7 @@ void UTankAimingComponent::MoveBarrelToward(FVector aimDirection)
 	auto deltaRotator = aimAsRotator - barrelRotator;
 	UE_LOG(LogTemp, Warning, TEXT("Aiming rotator %s "), *(aimAsRotator.ToString()));
 
-	Barrel->Elevate(5);
+	Barrel->Elevate(deltaRotator.Pitch);
 
 	
 
